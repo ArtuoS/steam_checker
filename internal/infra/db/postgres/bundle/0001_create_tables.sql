@@ -1,0 +1,13 @@
+CREATE TABLE games (
+    id UUID PRIMARY KEY,
+    app_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    packages INTEGER[] NOT NULL DEFAULT '{}'
+);
+
+CREATE TABLE events (
+    id UUID PRIMARY KEY,
+    game_id UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    type INTEGER NOT NULL,
+    data JSONB NOT NULL
+);
