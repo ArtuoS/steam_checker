@@ -30,7 +30,7 @@ func (i *Integration) GetPlayerCount(ctx context.Context, appID int) (GetPlayerC
 
 	params := url.Values{}
 	params.Set("key", i.APIKey)
-	params.Set("appid", string(appID))
+	params.Set("appid", strconv.Itoa(appID))
 	params.Set("format", "json")
 
 	reqURL := endpoint + "?" + params.Encode()
@@ -46,6 +46,8 @@ func (i *Integration) GetPlayerCount(ctx context.Context, appID int) (GetPlayerC
 		return GetPlayerCountData{}, err
 	}
 	defer resp.Body.Close()
+
+	// printData(resp)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return GetPlayerCountData{}, fmt.Errorf("steam api returned status %d", resp.StatusCode)
@@ -79,6 +81,8 @@ func (i *Integration) GetAppDetails(ctx context.Context, appID int) (GetAppDetai
 	}
 	defer resp.Body.Close()
 
+	// printData(resp)
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return GetAppDetailsData{}, fmt.Errorf("steam api returned status %d", resp.StatusCode)
 	}
@@ -88,7 +92,12 @@ func (i *Integration) GetAppDetails(ctx context.Context, appID int) (GetAppDetai
 		return GetAppDetailsData{}, err
 	}
 
-	fmt.Println(res["Data"].Data)
+	return res[strconv.Itoa(appID)].Data, nil
+}
 
-	return res["Data"].Data, nil
+func printData(resp *http.Response) {
+	var res map[string]any
+	_ = json.NewDecoder(resp.Body).Decode(&res)
+	prettyJSON, _ := json.MarshalIndent(res, "", "    ")
+	fmt.Println(string(prettyJSON))
 }

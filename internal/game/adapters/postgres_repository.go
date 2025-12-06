@@ -6,6 +6,8 @@ import (
 	"steam_checker/internal/game"
 	"steam_checker/internal/infra/db/postgres"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 type PostgresRepository struct {
@@ -46,8 +48,8 @@ func (p *PostgresRepository) Create(ctx context.Context, input *game.Game) error
 	}()
 
 	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO games (id, app_id, name) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`,
-		input.ID, input.AppID, input.Name); err != nil {
+		`INSERT INTO games (id, app_id, name, packages) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING`,
+		input.ID, input.AppID, input.Name, pq.Array(input.Packages)); err != nil {
 		return err
 	}
 
