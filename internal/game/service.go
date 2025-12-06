@@ -46,7 +46,7 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) error {
 
 	exists, err := s.repository.Exists(ctx, input.AppID)
 	if err != nil {
-		return fmt.Errorf("erro validating if game exists: %x", err)
+		return fmt.Errorf("erro validating if game exists: %w", err)
 	}
 
 	if exists {
@@ -55,18 +55,18 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) error {
 
 	appDetailsResponse, err := s.steamIntegration.GetAppDetails(ctx, input.AppID)
 	if err != nil {
-		return fmt.Errorf("erro getting app details: %x", err)
+		return fmt.Errorf("erro getting app details: %w", err)
 	}
 
 	playerCountResponse, err := s.steamIntegration.GetPlayerCount(ctx, input.AppID)
 	if err != nil {
-		return fmt.Errorf("erro getting player count: %x", err)
+		return fmt.Errorf("erro getting player count: %w", err)
 	}
 
 	id := uuid.New()
 	evt, err := event.New(uuid.New(), id, event.PlayerCount, playerCountResponse)
 	if err != nil {
-		return fmt.Errorf("erro creating event: %x", err)
+		return fmt.Errorf("erro creating event: %w", err)
 	}
 
 	err = s.repository.Create(ctx, &Game{
@@ -79,7 +79,7 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("error creating game: %x", err)
+		return fmt.Errorf("error creating game: %w", err)
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) error {
 func (s *Service) GetAll(ctx context.Context) ([]Game, error) {
 	models, err := s.repository.GetAll(ctx)
 	if err != nil {
-		return models, fmt.Errorf("error getting all games: %x", err)
+		return models, fmt.Errorf("error getting all games: %w", err)
 	}
 
 	for _, mdl := range models {

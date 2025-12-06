@@ -7,6 +7,7 @@ import (
 	"steam_checker/internal/infra/db/postgres"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/lib/pq"
 )
 
@@ -22,7 +23,7 @@ func NewPostgresRepository(db *postgres.DB) *PostgresRepository {
 
 func (p *PostgresRepository) GetAll(ctx context.Context) ([]game.Game, error) {
 	var models []game.Game
-	rows, err := p.DB.Connection.QueryContext(ctx, `SELECT * FROM games`)
+	rows, err := p.DB.Connection.Query(ctx, `SELECT * FROM games`)
 	if err != nil {
 		return models, err
 	}
@@ -35,19 +36,19 @@ func (p *PostgresRepository) GetAll(ctx context.Context) ([]game.Game, error) {
 }
 
 func (p *PostgresRepository) Create(ctx context.Context, input *game.Game) error {
-	tx, err := p.DB.Connection.BeginTx(ctx, nil)
+	tx, err := p.DB.Connection.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			tx.Rollback(ctx)
 		} else {
-			tx.Commit()
+			tx.Commit(ctx)
 		}
 	}()
 
-	if _, err := tx.ExecContext(ctx,
+	if _, err := tx.Exec(ctx,
 		`INSERT INTO games (id, app_id, name, packages) VALUES ($1, $2, $3, $4) ON CONFLICT (id) DO NOTHING`,
 		input.ID, input.AppID, input.Name, pq.Array(input.Packages)); err != nil {
 		return err
@@ -69,7 +70,7 @@ func (p *PostgresRepository) Create(ctx context.Context, input *game.Game) error
             INSERT INTO events (id, game_id, type, data) VALUES %s ON CONFLICT (id) DO NOTHING`,
 			strings.Join(valuePlaceholders, ","))
 
-		if _, err := tx.ExecContext(ctx, query, valueArgs...); err != nil {
+		if _, err := tx.Exec(ctx, query, valueArgs...); err != nil {
 			return err
 		}
 	}
@@ -78,11 +79,11 @@ func (p *PostgresRepository) Create(ctx context.Context, input *game.Game) error
 }
 
 func (p *PostgresRepository) Exists(ctx context.Context, appID int) (bool, error) {
-	var exists bool
-	if err := p.DB.Connection.GetContext(ctx, &exists,
-		`SELECT EXISTS(SELECT 1 FROM games WHERE app_id = $1)`, appID); err != nil {
+	rows, err := p.DB.Connection.Query(ctx,
+		`SELECT EXISTS(SELECT 1 FROM games WHERE app_id = $1)`, appID)
+	if err != nil {
 		return false, err
 	}
 
-	return exists, nil
+	return rows.Next(), nil
 }

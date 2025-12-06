@@ -34,7 +34,7 @@ func New(id, gameID uuid.UUID, et EventType, data any) (*Event, error) {
 	if data != "" {
 		body, err = json.Marshal(data)
 		if err != nil {
-			return nil, fmt.Errorf("error marshalling data: %x", err)
+			return nil, fmt.Errorf("error marshalling data: %w", err)
 		}
 	}
 

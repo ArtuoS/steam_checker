@@ -20,7 +20,7 @@ func NewPostgresRepository(db *postgres.DB) *PostgresRepository {
 
 func (p *PostgresRepository) GetByGameID(ctx context.Context, gameID uuid.UUID) ([]event.Event, error) {
 	var models []event.Event
-	rows, err := p.DB.Connection.QueryContext(ctx, "SELECT * FROM events WHERE game_id = ?", gameID)
+	rows, err := p.DB.Connection.Query(ctx, "SELECT * FROM events WHERE game_id = ?", gameID)
 	if err != nil {
 		return models, err
 	}
