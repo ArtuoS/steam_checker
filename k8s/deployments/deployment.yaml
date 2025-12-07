@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steam-checker
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: steam-checker
+  template:
+    metadata:
+      labels:
+        app: steam-checker
+    spec:
+      containers:
+      - name: steam-checker
+        image: steam-checker:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

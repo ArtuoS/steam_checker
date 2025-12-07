@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: steam-checker
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: steam-checker
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
