@@ -78,8 +78,7 @@ func (s *Service) Create(ctx context.Context, input *CreateInput) (Game, error) 
 		Packages: appDetailsResponse.Packages,
 		Events:   s.getEvents(id, playerCountResponse, appDetailsResponse),
 	}
-	err = s.repository.Create(ctx, &model)
-	if err != nil {
+	if err = s.repository.Create(ctx, &model); err != nil {
 		return model, fmt.Errorf("error creating game: %w", err)
 	}
 
