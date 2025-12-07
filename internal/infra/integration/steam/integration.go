@@ -66,6 +66,7 @@ func (i *Integration) GetAppDetails(ctx context.Context, appID int) (GetAppDetai
 
 	params := url.Values{}
 	params.Set("appids", strconv.Itoa(appID))
+	params.Set("cc", "BRL")
 
 	reqURL := endpoint + "?" + params.Encode()
 

@@ -10,6 +10,7 @@ import (
 type UserService interface {
 	Create(ctx context.Context, input *CreateInput) error
 	Authenticate(ctx context.Context, input *AuthenticateInput) (AuthenticateOutput, error)
+	Track(ctx context.Context, input *TrackInput) error
 }
 
 type Router struct {
@@ -59,4 +60,23 @@ func (r *Router) Authenticate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, output)
+}
+
+func (r *Router) Track(c *gin.Context) {
+	var input TrackInput
+	if err := c.ShouldBindUri(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := r.service.Track(c, &input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

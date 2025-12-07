@@ -52,7 +52,7 @@ func (p *PostgresRepository) ExistsByEmail(ctx context.Context, email string) (b
 func (p *PostgresRepository) GetByEmail(ctx context.Context, email string) (user.User, error) {
 	var model user.User
 	row := p.DB.Connection.QueryRow(ctx,
-		`SELECT id, name, email, password FROM users WHERE email = $1`, email) // Especifique as colunas
+		`SELECT id, name, email, password FROM users WHERE email = $1`, email)
 	if err := row.Scan(&model.ID, &model.Name, &model.Email, &model.Password); err != nil {
 		return model, err
 	}

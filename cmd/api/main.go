@@ -10,6 +10,7 @@ import (
 	"steam_checker/internal/user"
 
 	userAdapters "steam_checker/internal/user/adapters"
+	userGameAdapters "steam_checker/internal/user/user_game/adapters"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,8 +29,9 @@ func main() {
 	gameRouter := game.NewRouter(gameService)
 
 	userRepository := userAdapters.NewPostgresRepository(db)
+	userGameRepository := userGameAdapters.NewPostgresRepository(db)
 
-	userService := user.NewService(userRepository)
+	userService := user.NewService(userRepository, gameService, userGameRepository)
 	userRouter := user.NewRouter(userService)
 
 	authorized := router.Group("/")
@@ -41,6 +43,8 @@ func main() {
 
 	{
 		router.POST("/users", userRouter.Create)
+		authorized.POST("/users/games/:app_id/track", userRouter.Track)
+
 		router.POST("/auth", userRouter.Authenticate)
 	}
 

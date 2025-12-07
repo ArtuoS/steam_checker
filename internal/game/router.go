@@ -8,7 +8,7 @@ import (
 )
 
 type GameService interface {
-	Create(ctx context.Context, input *CreateInput) error
+	Create(ctx context.Context, input *CreateInput) (Game, error)
 	GetAll(ctx context.Context) ([]Game, error)
 }
 
@@ -31,7 +31,7 @@ func (r *Router) Track(c *gin.Context) {
 		return
 	}
 
-	if err := r.service.Create(c.Request.Context(), &input); err != nil {
+	if _, err := r.service.Create(c.Request.Context(), &input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})

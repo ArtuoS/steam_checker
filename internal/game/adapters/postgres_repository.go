@@ -79,11 +79,26 @@ func (p *PostgresRepository) Create(ctx context.Context, input *game.Game) error
 }
 
 func (p *PostgresRepository) Exists(ctx context.Context, appID int) (bool, error) {
-	rows, err := p.DB.Connection.Query(ctx,
-		`SELECT EXISTS(SELECT 1 FROM games WHERE app_id = $1)`, appID)
+	var exists bool
+	err := p.DB.Connection.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM games WHERE app_id = $1)`, appID).Scan(&exists)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return false, nil
+		}
 		return false, err
 	}
 
-	return rows.Next(), nil
+	return exists, nil
+}
+
+func (p *PostgresRepository) GetByAppID(ctx context.Context, appID int) (game.Game, error) {
+	var model game.Game
+	row := p.DB.Connection.QueryRow(ctx,
+		`SELECT id, app_id, name, packages FROM games WHERE app_id = $1`, appID)
+	if err := row.Scan(&model.ID, &model.AppID, &model.Name, &model.Packages); err != nil {
+		return model, err
+	}
+
+	return model, nil
 }

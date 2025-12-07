@@ -17,10 +17,18 @@ type AuthenticateOutput struct {
 	Token string `json:"token"`
 }
 
+type TrackInput struct {
+	AppID int `json:"app_id" uri:"app_id"`
+}
+
 func (c *CreateInput) Validate() error {
 	return validator.New().Struct(c)
 }
 
 func (c *AuthenticateInput) Validate() error {
+	return validator.New().Struct(c)
+}
+
+func (c *TrackInput) Validate() error {
 	return validator.New().Struct(c)
 }
